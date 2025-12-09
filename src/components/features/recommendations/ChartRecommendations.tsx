@@ -2,6 +2,7 @@ import { GlassCard } from '../../ui/GlassCard';
 import type { ChartRecommendation } from '../../../lib/recommendations/recommendEngine';
 import { BarChart, LineChart, ScatterChart, PieChart, Activity, Box, Grid } from 'lucide-react';
 import { GlowButton } from '../../ui/GlowButton';
+import { getChartImage } from '../../../lib/chartGallery';
 
 interface ChartRecommendationsProps {
     recommendations: ChartRecommendation[];
@@ -32,37 +33,51 @@ export const ChartRecommendations = ({ recommendations, onSelect }: ChartRecomme
                 {recommendations.map((rec, index) => (
                     <GlassCard
                         key={rec.type}
-                        className={`cursor-pointer group relative ${index === 0 ? 'border-cyan-500/50 bg-cyan-900/10' : ''}`}
+                        className={`cursor-pointer group relative overflow-hidden ${index === 0 ? 'border-cyan-500/50' : ''}`}
                         onClick={() => onSelect(rec)}
                     >
-                        {index === 0 && (
-                            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-cyan-500/20 z-10">
-                                TOP MATCH
-                            </div>
-                        )}
-
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors">
-                                <ChartIcon type={rec.type} />
-                            </div>
-                            <div className="text-2xl font-bold font-mono text-gray-500 group-hover:text-white transition-colors">
-                                {rec.score}%
-                            </div>
+                        {/* Background Image Layer */}
+                        <div className="absolute inset-0 z-0">
+                            <img
+                                src={getChartImage(rec.type)}
+                                alt={rec.title}
+                                className="w-full h-full object-cover opacity-20 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 ease-out"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/80 to-gray-900 border-b border-white/5" />
                         </div>
 
-                        <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">
-                            {rec.title}
-                        </h3>
-                        <p className="text-gray-400 text-sm mb-6 h-10">
-                            {rec.description}
-                        </p>
+                        <div className="relative z-10 flex flex-col h-full">
+                            {index === 0 && (
+                                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-cyan-500/20">
+                                    TOP MATCH
+                                </div>
+                            )}
 
-                        <GlowButton
-                            variant="ghost"
-                            className="w-full justify-center group-hover:bg-white/10 border-white/10"
-                        >
-                            Visualize
-                        </GlowButton>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors backdrop-blur-md border border-white/5">
+                                    <ChartIcon type={rec.type} />
+                                </div>
+                                <div className="text-2xl font-bold font-mono text-cyan-400 group-hover:text-cyan-300 transition-colors">
+                                    {rec.score}%
+                                </div>
+                            </div>
+
+                            <h3 className="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">
+                                {rec.title}
+                            </h3>
+                            <p className="text-gray-400 text-sm mb-6 h-10 line-clamp-2">
+                                {rec.description}
+                            </p>
+
+                            <div className="mt-auto">
+                                <GlowButton
+                                    variant="ghost"
+                                    className="w-full justify-center group-hover:bg-cyan-500/20 border-white/10"
+                                >
+                                    Visualize
+                                </GlowButton>
+                            </div>
+                        </div>
                     </GlassCard>
                 ))}
             </div>

@@ -9,9 +9,9 @@ interface FloatingHeaderProps {
 
 export const FloatingHeader = ({ activeTab, onNavigate }: FloatingHeaderProps) => {
     const navItems = [
-        { id: 'analyze', label: 'Analiz' },
-        { id: 'recommend', label: 'Görselleştirmek' },
-        { id: 'vision_upload', label: 'Tanımak' },
+        { id: 'analyze', label: 'Analyze' },
+        { id: 'recommend', label: 'Visualize' },
+        { id: 'vision_upload', label: 'Vision' },
     ] as const;
 
     return (

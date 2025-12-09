@@ -50,9 +50,16 @@ function App() {
     }
   };
 
+  /* New state for side-by-side vision display */
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
   const handleImageUpload = async (file: File) => {
     try {
       setIsProcessing(true);
+      // Create a local URL for the uploaded image to display it
+      const objectUrl = URL.createObjectURL(file);
+      setUploadedImage(objectUrl);
+
       const result = await analyzeImage(file);
       setVisionResult(result);
       setActiveTab('vision_result');
@@ -202,6 +209,7 @@ function App() {
               result={visionResult}
               analysis={analysis}
               data={dataset?.data || []}
+              uploadedImage={uploadedImage}
               onVisualize={handleVisionVisualize}
             />
           </motion.div>
@@ -224,7 +232,7 @@ function App() {
                 </GlowButton>
               </div>
             </div>
-            <AnalysisDashboard analysis={analysis} />
+            <AnalysisDashboard analysis={analysis} data={dataset?.data || []} onVisualize={handleChartSelect} />
           </motion.div>
         )}
 

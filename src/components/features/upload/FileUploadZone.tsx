@@ -4,6 +4,7 @@ import { Upload, FileType, CheckCircle, AlertCircle } from 'lucide-react';
 import { GlassCard } from '../../ui/GlassCard';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { SAMPLE_CSV_DATA } from '../../../lib/sampleData';
 
 function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs));
@@ -154,10 +155,22 @@ export const FileUploadZone = ({ onFileSelect }: FileUploadZoneProps) => {
                                     Support for CSV, Excel (.xlsx, .xls).
                                     Our engine will auto-detect formats.
                                 </p>
-                                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                                <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-6">
                                     <CheckCircle className="w-4 h-4 text-cyan-500" />
                                     <span>Secure Local Processing</span>
                                 </div>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        const file = new File([SAMPLE_CSV_DATA], "sample_data.csv", { type: "text/csv" });
+                                        onFileSelect(file);
+                                    }}
+                                    className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm text-cyan-400 transition-colors"
+                                >
+                                    Or try with Sample Data
+                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>

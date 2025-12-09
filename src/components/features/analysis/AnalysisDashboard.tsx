@@ -1,15 +1,32 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard } from '../../ui/GlassCard';
 import type { DatasetAnalysis } from '../../../lib/analyzeData';
-import { Database, Layout, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Database, Layout, ShieldCheck, AlertTriangle, Sparkles } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { clsx } from 'clsx';
+import { recommendCharts, type ChartRecommendation } from '../../../lib/recommendations/recommendEngine';
+import { DynamicChart } from '../canvas/DynamicChart';
+import { SmartAnalysis } from './SmartAnalysis';
 
 interface AnalysisDashboardProps {
     analysis: DatasetAnalysis;
+    data?: any[]; // We need data to render the chart
+    onVisualize?: (chart: ChartRecommendation) => void;
 }
 
-export const AnalysisDashboard = ({ analysis }: AnalysisDashboardProps) => {
+export const AnalysisDashboard = ({ analysis, data = [], onVisualize }: AnalysisDashboardProps) => {
+    const [recommendations, setRecommendations] = useState<ChartRecommendation[]>([]);
+
+    useEffect(() => {
+        if (analysis) {
+            const recs = recommendCharts(analysis);
+            setRecommendations(recs);
+        }
+    }, [analysis]);
+
+    const bestFit = recommendations.length > 0 ? recommendations[0] : null;
+
     const container = {
         hidden: { opacity: 0 },
         show: {
@@ -30,7 +47,7 @@ export const AnalysisDashboard = ({ analysis }: AnalysisDashboardProps) => {
             variants={container}
             initial="hidden"
             animate="show"
-            className="w-full max-w-6xl mx-auto space-y-8"
+            className="w-full max-w-7xl mx-auto space-y-8"
         >
             {/* Top Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -66,11 +83,115 @@ export const AnalysisDashboard = ({ analysis }: AnalysisDashboardProps) => {
 
                 <GlassCard className="bg-cyan-900/20 border-cyan-500/30">
                     <div className="h-full flex flex-col justify-center">
-                        <p className="text-sm text-cyan-400 font-semibold mb-1">AI INSIGHT</p>
-                        <p className="text-xs text-gray-300">Dataset is ready for advanced visualization.</p>
+                        <p className="text-sm text-cyan-400 font-semibold mb-1 flex items-center gap-2">
+                            <Sparkles className="w-3 h-3" /> AI INSIGHT
+                        </p>
+                        <p className="text-xs text-gray-300">
+                            {bestFit ? `Best fit: ${bestFit.title}` : "Dataset is ready for visualization."}
+                        </p>
                     </div>
                 </GlassCard>
             </div>
+
+            {/* Best Fit Visualization Section */}
+            {bestFit && (
+                <GlassCard className="border-cyan-500/20 bg-cyan-900/5 overflow-hidden">
+                    <div className="flex flex-col md:flex-row h-[450px] w-full"> {/* Ensure w-full */}
+                        <div className="flex-1 p-4 relative h-full min-h-[300px] min-w-0"> {/* Add min-w-0 to prevent flex overflow issues, and min-h */}
+                            <div className="absolute top-4 left-4 z-10 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-xs text-cyan-400 font-mono">
+                                ★ Top Recommendation
+                            </div>
+                            <div className="w-full h-full"> {/* Wrapping DynamicChart in explicit full size div */}
+                                <DynamicChart
+                                    type={bestFit.type}
+                                    data={data}
+                                    analysis={analysis}
+                                    channels={bestFit.requiredChannels}
+                                />
+                            </div>
+                        </div>
+                        <div className="w-full md:w-80 border-l border-white/5 p-8 flex flex-col justify-center bg-black/20">
+                            <div className="mb-6">
+                                <p className="text-xs font-bold text-violet-400 tracking-widest uppercase mb-2">RECOMMENDED</p>
+                                <h3 className="text-3xl font-bold text-white mb-3 leading-tight">{bestFit.title}</h3>
+                                <p className="text-gray-400 text-sm leading-relaxed">
+                                    {bestFit.description}
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-lg bg-white/5 border border-white/5">
+                                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-3">WHY THIS CHART?</p>
+                                <ul className="space-y-2">
+                                    {(() => {
+                                        const getReasons = (type: string) => {
+                                            switch (type) {
+                                                case 'line':
+                                                case 'area':
+                                                    return [
+                                                        "Optimal for time-series analysis",
+                                                        "Highlights trends over periods",
+                                                        "High data density visual"
+                                                    ];
+                                                case 'bar':
+                                                case 'radar':
+                                                    return [
+                                                        "Best for categorical comparison",
+                                                        "Clear value differentiation",
+                                                        "Easy to read discrete groups"
+                                                    ];
+                                                case 'scatter':
+                                                    return [
+                                                        "Shows correlation patterns",
+                                                        "Identifies relationship strength",
+                                                        "Good for outlier detection"
+                                                    ];
+                                                case 'pie':
+                                                    return [
+                                                        "Shows part-to-whole ratio",
+                                                        "Simple composition view",
+                                                        "Effective for few categories"
+                                                    ];
+                                                case 'histogram':
+                                                case 'boxplot':
+                                                    return [
+                                                        "Visualizes data distribution",
+                                                        "Key for statistical analysis",
+                                                        "Detects spread & skewness"
+                                                    ];
+                                                default:
+                                                    return [
+                                                        "Best statistical fit",
+                                                        "Matches data structure",
+                                                        "High readability score"
+                                                    ];
+                                            }
+                                        };
+
+                                        const reasons = getReasons(bestFit.type);
+
+                                        return (
+                                            <>
+                                                <li className="flex items-start gap-2 text-sm text-gray-300">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                                                    <span>{reasons[0]}</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-sm text-gray-300">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                                                    <span>{reasons[1]} ({bestFit.score}% fit)</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-sm text-gray-300">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                                                    <span>{reasons[2]}</span>
+                                                </li>
+                                            </>
+                                        )
+                                    })()}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </GlassCard>
+            )}
 
             {/* Column Details Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -96,10 +217,6 @@ export const AnalysisDashboard = ({ analysis }: AnalysisDashboardProps) => {
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
-                    </div>
-                    <div className="mt-4 flex gap-4 justify-center text-xs text-gray-400">
-                        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-cyan-500"></span> Numeric</div>
-                        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-violet-500"></span> Categorical</div>
                     </div>
                 </GlassCard>
 
@@ -145,6 +262,11 @@ export const AnalysisDashboard = ({ analysis }: AnalysisDashboardProps) => {
                     </div>
                 </GlassCard>
             </div>
+
+            {/* Advanced Statistical Analysis (R Part) */}
+            <motion.div variants={item}>
+                <SmartAnalysis data={data} />
+            </motion.div>
         </motion.div>
     );
 };

@@ -2,7 +2,7 @@ import type { DatasetAnalysis } from '../analyzeData';
 
 export type ChartType =
     | 'bar' | 'line' | 'area' | 'scatter' | 'pie'
-    | 'histogram' | 'boxplot' | 'heatmap' | 'radar';
+    | 'histogram' | 'boxplot' | 'heatmap' | 'radar' | 'funnel' | 'treemap';
 
 export interface ChartRecommendation {
     type: ChartType;
@@ -134,6 +134,8 @@ export const checkChartCompatibility = (analysis: DatasetAnalysis | null, chartT
         case 'bar':
         case 'pie':
         case 'radar':
+        case 'funnel':
+        case 'treemap':
             if (categoricalCols.length === 0) return { compatible: false, reason: "Requires a Categorical column" };
             if (numericCols.length === 0) return { compatible: false, reason: "Requires a Numeric column" };
             return { compatible: true };
