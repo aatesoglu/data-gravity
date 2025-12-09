@@ -9,27 +9,33 @@ Data Gravity, veri setlerinizi saniyeler içinde analiz eden, görselleştiren v
 ## 🛠️ Kurulum ve Çalıştırma
 Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyin:
 1.  **Depoyu Klonlayın**:
+  ```
     git clone https://https://github.com/aatesoglu/data-gravity.git
     cd data-gravity
     ```
 2.  **Bağımlılıkları Yükleyin**:
+  ```
     npm install
     ```
 3.  **Geliştirme Sunucusunu Başlatın**:
+   ```
     npm run dev
     ```
-### Backend Kurulumu ve Çalıştırma
+### Backend Kurulumu ve Çalıştırma ###
 
 Backend servisi `backend` klasörü altında yer almaktadır. Yeni bir terminal penceresi açın (veya mevcut pencerede) aşağıdaki komutları sırasıyla uygulayın:
 
  **Backend klasörüne gidin:**
+   ```
     cd backend
     ```
  **Gerekli Python Kütüphanelerini Yükleyin:**
+    ```
     pip install "fastapi[standard]"
     ```
 4.  **Backend Sunucusunu Başlatın:**
-
+    ```
+    
     Uygulamayı geliştirme modunda çalıştırmak için:
     ```
     uvicorn main:app --reload
